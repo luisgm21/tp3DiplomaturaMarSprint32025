@@ -20,11 +20,9 @@ export async function obtenerSuperHeroePorIdController(req ,res) {
 export async function obtenerTodosLosSuperHeroesController(req ,res) {
     
     try {
-        const superHeroes = await obtenerTodosLosSuperHeroes();
-    
-        const superHeroesFormateados = renderizarSuperHeroes(superHeroes);
-
-        res.status(200).json(superHeroesFormateados);
+        const superheroes = await obtenerTodosLosSuperHeroes();
+        
+        res.render('dashboard', { superheroes });
     } catch (error) {
         res.status(500).send({message: 'Error al obtener los super heroes', error: error.message});
     }
@@ -61,14 +59,28 @@ export async function obtenerSuperHeroesMayoresDe30Controller(req ,res) {
 
 export async function agregarSuperHeroeController(req ,res) {
     try {
+      
         const { nombreSuperHeroe, nombreReal, edad, planetaOrigen, debilidad , poderes, aliados, enemigos } = req.body;
-        const superHeroe = await agregarSuperHeroe(nombreSuperHeroe , nombreReal , edad , planetaOrigen, debilidad , poderes , aliados , enemigos );
+        
+        const parseToArray = (data) => (typeof data === 'string' ? data.split(',').map(item => item.trim()) : data);
+
+        const poderesArray = parseToArray(poderes);
+        const aliadosArray = parseToArray(aliados);
+        const enemigosArray = parseToArray(enemigos);
+
+        const superHeroe = await agregarSuperHeroe(nombreSuperHeroe , nombreReal , edad , planetaOrigen, debilidad , poderesArray , aliadosArray , enemigosArray );
         if(!superHeroe) return res.status(404).json({message: 'Super Heroe no encontrado'});
 
         const superHeroeFormateado = renderizarSuperHeroe(superHeroe);
         
+        res.redirect('/api/heroes'); // Redirige a la lista de superhéroes
         res.status(200).json({message: 'Superhéroe registrado correctamente', data: superHeroeFormateado});
+        
     } catch (error) {
+        res.status(500).render('dashboard', {
+            superheroes: await obtenerTodosLosSuperHeroes(), // Enviar la lista actual de superhéroes
+            errorMessages: [{ msg: 'Error al agregar el superhéroe. Inténtalo de nuevo.' }]
+        });
         res.status(500).send({message: 'Error al obtener el super heroe', error: error.message});
     }
 }
@@ -79,13 +91,26 @@ export async function editarSuperHeroeController(req ,res) {
         const { nombreSuperHeroe, nombreReal, edad, planetaOrigen, debilidad , poderes, aliados, enemigos } = req.body;
         const superHeroe = await obtenerSuperHeroePorId(id);
         if(!superHeroe) return res.status(404).json({message: 'Super Heroe no encontrado'});
-        const superHeroeEditado = await editarSuperHeroe(id, nombreSuperHeroe , nombreReal , edad , planetaOrigen, debilidad , poderes , aliados , enemigos );
+        const parseToArray = (data) => (typeof data === 'string' ? data.split(',').map(item => item.trim()) : data);
+
+        const poderesArray = parseToArray(poderes);
+        const aliadosArray = parseToArray(aliados);
+        const enemigosArray = parseToArray(enemigos);
+        
+        const superHeroeEditado = await editarSuperHeroe(id, nombreSuperHeroe , nombreReal , edad , planetaOrigen, debilidad , poderesArray , aliadosArray , enemigosArray );
         
 
         const superHeroeFormateado = renderizarSuperHeroeEditado(superHeroe, superHeroeEditado);
 
-        res.status(200).json({message: 'Superhéroe actualizado correctamente', data: superHeroeFormateado});
+        res.redirect('/api/heroes'); // Redirige a la lista de superhéroes
+        // res.status(200).json({message: 'Superhéroe actualizado correctamente', data: superHeroeFormateado});
+        
     } catch (error) {
+        // Manejar errores y renderizar la vista con mensajes de error
+        res.status(500).render('dashboard', {
+            superheroes: await obtenerTodosLosSuperHeroes(), // Lista actual de superhéroes
+            errorMessages: [{ msg: 'Error al editar el superhéroe. Inténtalo de nuevo.' }]
+        });
         res.status(500).send({message: 'Error al obtener el super heroe', error: error.message});
     }
 }
@@ -94,10 +119,10 @@ export async function eliminarSuperHeroePorIdController(req ,res) {
         const { id } = req.params;
         const superHeroe = await obtenerSuperHeroePorId(id);
         if(!superHeroe) return res.status(404).json({message: 'Super Heroe no encontrado'});
-        const superHeroeEliminado = await eliminarSuperHeroePorNombreSuperHeroe(nombreSuperHeroe);
-        const superHeroeFormateado = renderizarSuperHeroe(superHeroeEliminado);
+        await eliminarSuperHeroePorId(id);
 
-        res.status(200).json({message: 'Superhéroe eliminado correctamente', data: superHeroeFormateado});
+        res.redirect('/api/heroes'); // Redirige a la lista de superhéroes
+        // res.status(200).json({message: 'Superhéroe eliminado correctamente', data: superHeroeFormateado});
     } catch (error) {
         res.status(500).send({message: 'Error al obtener el super heroe', error: error.message});
     }
