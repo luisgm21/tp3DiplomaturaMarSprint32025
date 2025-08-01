@@ -9,7 +9,9 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 app.use(methodOverride(function (req, res) {
+    req.body._method = req.url.includes('agregar') ? 'POST' : req.url.includes('editar') ? 'PUT' : '';
     if (req.body && typeof req.body === 'object' && '_method' in req.body) {
         // Guardar el método original
         const method = req.body._method;

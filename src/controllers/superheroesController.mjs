@@ -74,7 +74,7 @@ export async function agregarSuperHeroeController(req ,res) {
         const superHeroeFormateado = renderizarSuperHeroe(superHeroe);
         
         res.redirect('/api/heroes'); // Redirige a la lista de superhéroes
-        res.status(200).json({message: 'Superhéroe registrado correctamente', data: superHeroeFormateado});
+        // res.status(200).json({message: 'Superhéroe registrado correctamente', data: superHeroeFormateado});
         
     } catch (error) {
         res.status(500).render('dashboard', {

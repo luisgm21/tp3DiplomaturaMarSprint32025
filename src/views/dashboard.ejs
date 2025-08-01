@@ -135,6 +135,8 @@
             superheroForm.action = `/api/heroes/${id}/editar`; // Cambiar acción a editar
             methodField.value = "PUT"; // Método PUT para editar
 
+            console.log("Hello soy un console log",methodField.value); // Verificar la acción del formulario en la consola
+
             // Llenar el formulario con los datos del superhéroe
             document.getElementById("nombreSuperHeroe").value = nombreSuperHeroe;
             document.getElementById("nombreReal").value = nombreReal;
@@ -144,6 +146,7 @@
             document.getElementById("poderes").value = poderes;
             document.getElementById("aliados").value = aliados;
             document.getElementById("enemigos").value = enemigos;
+            document.getElementById("methodField").value = "PUT"; // Método PUT para editar
 
             modal.classList.remove("hidden");
         });
